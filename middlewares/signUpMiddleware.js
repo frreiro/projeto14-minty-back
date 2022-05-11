@@ -15,7 +15,7 @@ export async function signUpValidate(req, res, next) {
     if (body.password !== body.confirmPassword) return res.status(400).send("As senhas precisam ser iguais");
 
     const { error } = signUpSchema.validate(body, { abortEarly: false });
-    if (error) res.status(422).send(error.details.map(detail => detail.message));
+    if (error) return res.status(422).send(error.details.map(detail => detail.message));
 
     next();
 }
