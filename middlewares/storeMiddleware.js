@@ -1,10 +1,10 @@
-import gameDb from '.././gameDb.js';
+import db from '.././db.js';
 
 const validateStore = async (req, res, next) => {
     const page = parseInt(req.query.page);
     try {
         const perPage = 20;
-        const gamesCount = await gameDb.collection('games').count();
+        const gamesCount = await db.collection('games').count();
         const pageCount = Math.ceil(gamesCount / perPage);
 
         if (page < 1) return res.status(400).send('Número da página inválido');

@@ -1,8 +1,8 @@
-import gameDb from '.././gameDb.js';
+import db from '../db.js';
 
 const getGames = async (req, res) => {
     try{
-        const games = await gameDb.collection('games').find().toArray();
+        const games = await db.collection('games').find().toArray();
         const perPage = 20;
         const to = req.gamesCount - ((req.query.page - 1 ) * perPage);
         const from = req.gamesCount - (req.query.page * perPage);
