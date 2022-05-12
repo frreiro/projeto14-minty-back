@@ -4,6 +4,7 @@ import cors from "cors";
 
 import signUpRouter from "./routes/signUpRouter.js";
 import loginRouter from "./routes/loginRouter.js";
+import gameRouter from "./routes/gameRouter.js";
 
 
 const app = express();
@@ -17,6 +18,7 @@ app.get("/store", (req, res) => {
 
 app.use(signUpRouter);
 app.use(loginRouter)
+app.use(gameRouter);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
