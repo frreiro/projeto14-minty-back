@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { addCart } from "../controllers/cartController.js";
-import { gameValidate, idValidate, tokenValidate } from "../middlewares/cartMiddleware.js";
+import { addCart, deleteGame, getCart } from "../controllers/cartController.js";
+import { equalGamesValidate, gameValidate, idValidate, tokenValidate } from "../middlewares/cartMiddleware.js";
 
 const cartRouter = Router();
 
-cartRouter.post("/cart/:gameId", idValidate, gameValidate, tokenValidate, addCart);
-
+cartRouter.post("/cart/:gameId", idValidate, gameValidate, tokenValidate, equalGamesValidate, addCart);
+cartRouter.get("/cart", tokenValidate, getCart);
+cartRouter.delete("/cart/:gameId", idValidate, gameValidate, tokenValidate, deleteGame)
 export default cartRouter;

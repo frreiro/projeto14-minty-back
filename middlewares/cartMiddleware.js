@@ -28,9 +28,6 @@ export async function gameValidate(req, res, next) {
     next();
 }
 
-
-
-
 export async function tokenValidate(req, res, next) {
     const { authorization } = req.headers;
     const token = authorization?.replace('Bearer', "").trim();
@@ -51,5 +48,16 @@ export async function tokenValidate(req, res, next) {
     next();
 }
 
+export async function equalGamesValidate(req, res, next) {
+    const { gameId } = req.params;
+    const { user } = res.locals;
 
-
+    try {
+        const userCart = await db.collection('carts').findOne({ userId: user._id });
+        if (userCart?.gamesIds.some(id => id === gameId)) return res.status(409).send("Jogo já adicionado");
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+    next()
+}
