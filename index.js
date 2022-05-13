@@ -4,8 +4,10 @@ import cors from "cors";
 
 import signUpRouter from "./routes/signUpRouter.js";
 import loginRouter from "./routes/loginRouter.js";
+import cartRouter from "./routes/cartRouter.js";
 import storeRouter from "./routes/storeRouter.js";
 import gameRouter from "./routes/gameRouter.js";
+
 
 
 const app = express();
@@ -14,6 +16,8 @@ app.use(cors());
 
 app.use(signUpRouter);
 app.use(loginRouter)
+
+app.use(cartRouter)
 app.use(gameRouter);
 app.use(storeRouter);
 
