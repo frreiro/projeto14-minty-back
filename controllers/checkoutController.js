@@ -1,5 +1,5 @@
 import db from "../db.js"
-import { ObjectId } from "mongodb";
+import Joi from "joi";
 
 const getCartTotal = async (req, res) => {
     try {
@@ -10,37 +10,49 @@ const getCartTotal = async (req, res) => {
     }
 }
 
+const paymentSchema = Joi.object().keys({
+    payment: Joi.string().valid("cartao","boleto").required()
+})
+
 const checkout = async (req, res) => {
+    const { error } = paymentSchema.validate(req.body);
     const { user } = res.locals;
     const userCart = req.userCart;
     try {
+        if (error) return res.status(422).send(error.details.map(detail => detail.message));
         if (userCart.gamesIds.length === 0) return res.status(404).send("Carrinho vazio");
         await db.collection('carts').updateOne({ userId: user._id }, { $set: { gamesIds: [] } });
+        const userPurchases = await db.collection('checkouts').findOne({ userId: user._id });
+
+        const gamesPurchased = [];
+        userPurchases.purchases.forEach(purchase => {
+            gamesPurchased.push(...purchase.gamesIds);
+        });
+
+        if (userCart.gamesIds.some(gameId => gamesPurchased.includes(gameId))) {
+            return res.status(409).send("Existem produtos no carrinho que já foram comprados");
+        }
+
         userCart.gamesIds.forEach(async (gameId) => {
-            const userGameList = await db.collection('userGames').findOne({ userId: user._id });
-            if(!userGameList) {
+            const userGames = await db.collection('userGames').findOne({ userId: user._id });
+            if (!userGames) {
                 await db.collection('userGames').insertOne({
                     userId: user._id,
                     gamesIds: [gameId]
                 });
+            } else {
+                await db.collection('userGames').updateOne({ userId: user._id }, { $push: { gamesIds: gameId } })
             }
-            else if (userGameList.gamesIds.includes(gameId)) {
-                const game = await db.collection('games').findOne({ _id: new ObjectId(gameId) });
-                return res.status(400).send({ message: `Você já possui o jogo ${game.title}` });
-            }
-            else {
-                let jogo = await db.collection('userGames').updateOne({ userId: user._id }, { $push: { gamesIds: gameId } })
-                console.log(jogo)
-            }
-        });  
-        const userPurchases = await db.collection('checkouts').findOne({ userId: user._id });
+        });
+
         if (!userPurchases) {
-            await db.collection('checkouts').insertOne({ 
+            await db.collection('checkouts').insertOne({
                 userId: user._id,
                 purchases: [
                     {
                         gamesIds: userCart.gamesIds,
-                        total: req.sum
+                        total: req.sum,
+                        payment: req.body.payment
                     }
                 ]
             });
@@ -49,7 +61,8 @@ const checkout = async (req, res) => {
                 $push: {
                     purchases: {
                         gamesIds: userCart.gamesIds,
-                        total: req.sum
+                        total: req.sum,
+                        payment: req.body.payment
                     }
                 }
             })
@@ -61,4 +74,4 @@ const checkout = async (req, res) => {
     }
 }
 
-export { getCartTotal, checkout};
+export { getCartTotal, checkout };
