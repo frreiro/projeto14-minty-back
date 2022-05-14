@@ -15,7 +15,7 @@ const paymentSchema = Joi.object().keys({
 })
 
 const checkout = async (req, res) => {
-    const { error } = Joi.validate(req.body, paymentSchema);
+    const { error } = paymentSchema.validate(req.body);
     const { user } = res.locals;
     const userCart = req.userCart;
     try {
