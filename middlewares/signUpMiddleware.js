@@ -25,8 +25,9 @@ export async function emailExist(req, res, next) {
 
     try {
         const user = await db.collection('users').findOne({ email });
-        if (user) res.status(409).send("E-mail já cadastrado");
+        if (user) return res.status(409).send("E-mail já cadastrado");
     } catch (e) {
+        console.log(e);
         res.sendStatus(500);
     }
 
