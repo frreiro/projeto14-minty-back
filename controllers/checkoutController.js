@@ -1,4 +1,5 @@
 import db from "../db.js"
+import Joi from "joi";
 
 const getCartTotal = async (req, res) => {
     try {
@@ -9,10 +10,16 @@ const getCartTotal = async (req, res) => {
     }
 }
 
+const paymentSchema = Joi.object().keys({
+    payment: Joi.string().valid("cartao","boleto").required()
+})
+
 const checkout = async (req, res) => {
+    const { error } = Joi.validate(req.body, paymentSchema);
     const { user } = res.locals;
     const userCart = req.userCart;
     try {
+        if (error) return res.status(422).send(error.details.map(detail => detail.message));
         if (userCart.gamesIds.length === 0) return res.status(404).send("Carrinho vazio");
         await db.collection('carts').updateOne({ userId: user._id }, { $set: { gamesIds: [] } });
         const userPurchases = await db.collection('checkouts').findOne({ userId: user._id });
@@ -44,7 +51,8 @@ const checkout = async (req, res) => {
                 purchases: [
                     {
                         gamesIds: userCart.gamesIds,
-                        total: req.sum
+                        total: req.sum,
+                        payment: req.body.payment
                     }
                 ]
             });
@@ -53,7 +61,8 @@ const checkout = async (req, res) => {
                 $push: {
                     purchases: {
                         gamesIds: userCart.gamesIds,
-                        total: req.sum
+                        total: req.sum,
+                        payment: req.body.payment
                     }
                 }
             })
