@@ -1,4 +1,5 @@
 import db from "../db.js";
+import { ObjectId } from "mongodb";
 
 const getUserGames = async (req, res) => {
     const { user } = res.locals;
@@ -6,7 +7,19 @@ const getUserGames = async (req, res) => {
         const userGames = await db.collection("userGames").find({
             userId: user._id
         }).toArray();
-        res.send(userGames);
+
+        const games = [];
+        userGames.forEach(userGame => {
+            userGame.gamesIds.forEach(gameId => {
+                games.push(gameId);
+            });
+        });
+
+        const gamesInfo = await db.collection("games").find({
+            _id: { $in: games.map(item => ObjectId(item)) }
+        }).toArray();
+
+        res.send(gamesInfo);
     }
     catch (e) {
         console.log(e);
