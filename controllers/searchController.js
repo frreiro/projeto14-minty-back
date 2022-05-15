@@ -2,7 +2,6 @@ import db from "../db.js";
 
 export async function searchGame(req, res) {
     const { name } = req.params
-    console.log(name);
 
     try {
         await db.collection('games').createIndex({ title: "text" });
