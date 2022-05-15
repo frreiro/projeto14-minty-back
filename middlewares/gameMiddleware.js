@@ -4,7 +4,7 @@ import db from "../db.js";
 export async function tokenValidate(req, res, next) {
     const { authorization } = req.headers;
     const token = authorization?.replace('Bearer', "").trim();
-    if (!token) return res.sendStatus(401);
+    if (!token) return res.status(401).send("Usuário sem permissão");
     try {
         const session = await db.collection('sessions').findOne({ token });
         if (!session) return res.status(401).send("Usuário não esta logado");

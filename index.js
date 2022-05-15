@@ -7,6 +7,7 @@ import loginRouter from "./routes/loginRouter.js";
 import cartRouter from "./routes/cartRouter.js";
 import storeRouter from "./routes/storeRouter.js";
 import gameRouter from "./routes/gameRouter.js";
+import searchRouter from "./routes/searchRoutes.js";
 
 
 
@@ -20,6 +21,8 @@ app.use(loginRouter)
 app.use(cartRouter)
 app.use(gameRouter);
 app.use(storeRouter);
+
+app.use(searchRouter);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
