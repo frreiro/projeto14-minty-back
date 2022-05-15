@@ -21,17 +21,18 @@ const checkout = async (req, res) => {
     try {
         if (error) return res.status(422).send(error.details.map(detail => detail.message));
         if (userCart.gamesIds.length === 0) return res.status(404).send("Carrinho vazio");
-        await db.collection('carts').updateOne({ userId: user._id }, { $set: { gamesIds: [] } });
         const userPurchases = await db.collection('checkouts').findOne({ userId: user._id });
-
         const gamesPurchased = [];
         userPurchases.purchases.forEach(purchase => {
             gamesPurchased.push(...purchase.gamesIds);
         });
 
         if (userCart.gamesIds.some(gameId => gamesPurchased.includes(gameId))) {
-            return res.status(409).send("Existem produtos no carrinho que já foram comprados");
+            return res.status(409).send("Existem produtos no carrinho que já foram comprados, remova-os para continuar");
         }
+
+        await db.collection('carts').updateOne({ userId: user._id }, { $set: { gamesIds: [] } });
+
 
         userCart.gamesIds.forEach(async (gameId) => {
             const userGames = await db.collection('userGames').findOne({ userId: user._id });
