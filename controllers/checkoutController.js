@@ -11,7 +11,7 @@ const getCartTotal = async (req, res) => {
 }
 
 const paymentSchema = Joi.object().keys({
-    payment: Joi.string().valid("cartao","boleto").required()
+    payment: Joi.string().valid("cartao", "boleto").required()
 })
 
 const checkout = async (req, res) => {
@@ -22,9 +22,16 @@ const checkout = async (req, res) => {
         if (error) return res.status(422).send(error.details.map(detail => detail.message));
         if (userCart.gamesIds.length === 0) return res.status(404).send("Carrinho vazio");
         const userPurchases = await db.collection('checkouts').findOne({ userId: user._id });
+        if (!userPurchases) {
+            await db.collection('checkouts').insertOne({
+                userId: user._id,
+                purchases: []
+            });
+        }
+
         const gamesPurchased = [];
         userPurchases.purchases.forEach(purchase => {
-            gamesPurchased.push(...purchase.gamesIds);
+            gamesPurchased.push(...purchase?.gamesIds);
         });
 
         if (userCart.gamesIds.some(gameId => gamesPurchased.includes(gameId))) {
@@ -46,28 +53,16 @@ const checkout = async (req, res) => {
             }
         });
 
-        if (!userPurchases) {
-            await db.collection('checkouts').insertOne({
-                userId: user._id,
-                purchases: [
-                    {
-                        gamesIds: userCart.gamesIds,
-                        total: req.sum,
-                        payment: req.body.payment
-                    }
-                ]
-            });
-        } else {
-            await db.collection('checkouts').updateOne({ userId: user._id }, {
-                $push: {
-                    purchases: {
-                        gamesIds: userCart.gamesIds,
-                        total: req.sum,
-                        payment: req.body.payment
-                    }
+        await db.collection('checkouts').updateOne({ userId: user._id }, {
+            $push: {
+                purchases: {
+                    gamesIds: userCart.gamesIds,
+                    total: req.sum,
+                    payment: req.body.payment
                 }
-            })
-        }
+            }
+        })
+
         res.status(201).send("Compra realizada com sucesso");
     } catch (e) {
         console.log(e);
