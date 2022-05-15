@@ -11,6 +11,7 @@ export async function signUp(req, res) {
         await db.collection('users').insertOne({ name, email, password: securePassword });
         res.status(201).send("Usuário cadastrado com sucesso");
     } catch (e) {
-        res.send(500);
+        console.log(e);
+        res.sendStatus(500);
     }
 }
