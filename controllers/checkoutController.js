@@ -21,16 +21,16 @@ const checkout = async (req, res) => {
     try {
         if (error) return res.status(422).send(error.details.map(detail => detail.message));
         if (userCart.gamesIds.length === 0) return res.status(404).send("Carrinho vazio");
-        const userPurchases = await db.collection('checkouts').findOne({ userId: user._id });
+        let userPurchases = await db.collection('checkouts').findOne({ userId: user._id });
         if (!userPurchases) {
-            await db.collection('checkouts').insertOne({
+            userPurchases = await db.collection('checkouts').insertOne({
                 userId: user._id,
                 purchases: []
             });
         }
 
         const gamesPurchased = [];
-        userPurchases.purchases.forEach(purchase => {
+        userPurchases.purchases?.forEach(purchase => {
             gamesPurchased.push(...purchase?.gamesIds);
         });
 
