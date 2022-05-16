@@ -76,7 +76,6 @@ export async function getCartNumber(req, res) {
     try {
         const userCart = await db.collection('carts').findOne({ userId: user._id });
         if (!userCart) return res.status(404).send("Carrinho não encontrado");
-        console.log(userCart)
         res.status(200).send(userCart.gamesIds);
     } catch (e) {
         console.log(e);

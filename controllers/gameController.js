@@ -8,6 +8,7 @@ export async function getGame(req, res) {
         if (!game) return res.status(404).send("Jogo não encontrado");
         res.status(200).send(game);
     } catch (e) {
+        console.log(e);
         res.sendStatus(500);
     }
 }

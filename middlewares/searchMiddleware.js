@@ -1,5 +1,3 @@
-//TODO: Middlewares 
-//                  - Validar se é uma string (ou se existe uma string)
 
 
 import Joi from "joi";
