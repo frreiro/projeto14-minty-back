@@ -68,3 +68,18 @@ export async function deleteGame(req, res) {
         res.sendStatus(500);
     }
 }
+
+export async function getCartNumber(req, res) {
+    const { user } = res.locals;
+    console.log(user)
+
+    try {
+        const userCart = await db.collection('carts').findOne({ userId: user._id });
+        if (!userCart) return res.status(404).send("Carrinho não encontrado");
+        console.log(userCart)
+        res.status(200).send(userCart.gamesIds);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+}
