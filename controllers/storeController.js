@@ -20,7 +20,6 @@ export async function getGames(req, res) {
 }
 
 export async function getRecentGames(req, res) {
-    console.log('entrei')
     try {
         const lastGames = await db.collection('games').find({}).sort({ release_date: -1 }).toArray();
         res.status(200).send(lastGames.reverse().slice(-6).reverse());
